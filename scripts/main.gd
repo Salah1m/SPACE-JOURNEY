@@ -14,7 +14,7 @@ var camera: Camera3D
 var speed := BASE_SPEED
 var distance_score := 0.0
 var coins := 0
-var next_spawn_z := -55.0
+var next_spawn_z := -600.0
 var steer_target := 0.0
 var touch_active := false
 var last_touch_x := 0.0
