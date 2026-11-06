@@ -57,7 +57,7 @@ function makeBike() {
     box(rider,[.18,.48,.2],dark,[x*.72,.45,-.1],[.1,0,0]);
   }
   root.add(rider);
-  root.position.set(0,0,2);
+  root.position.set(0,0,1);
   scene.add(root);
   return root;
 }
@@ -66,9 +66,9 @@ function makeWorld() {
   scene.background = new THREE.Color(0x071329);
   scene.fog = new THREE.FogExp2(0x09162b,.012);
   camera = new THREE.PerspectiveCamera(68,innerWidth/innerHeight,.1,500);
-  camera.position.set(0,4.2,9.5);
+  camera.position.set(0,6.2,15);
   // Aim the camera at the track immediately; otherwise it starts level and the 3D world is below the view.
-  camera.lookAt(0,1.1,-4);
+  camera.lookAt(0,1.2,-8);
   renderer = new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(devicePixelRatio,1.35));
   renderer.setSize(innerWidth,innerHeight);
@@ -124,7 +124,7 @@ function resetGame() {
   distance=0; coinCount=0; speed=23; targetX=0; steer=0; jumpTime=0; turboTime=0; spawnTimer=.5; pickupTimer=1;
   for(const item of [...obstacles,...pickups]) scene.remove(item);
   obstacles=[]; pickups=[];
-  bike.position.set(0,0,2);
+  bike.position.set(0,0,1);
   distanceEl.textContent='0000 m'; coinsEl.textContent='0';
 }
 function begin() {
@@ -150,8 +150,8 @@ function update(dt) {
   bike.rotation.z=THREE.MathUtils.damp(bike.rotation.z,-(targetX-bike.position.x)*.12,5,dt);
   bike.rotation.x=THREE.MathUtils.damp(bike.rotation.x,turbo?-.08:0,3,dt);
   camera.position.x=THREE.MathUtils.damp(camera.position.x,bike.position.x*.35,2.5,dt);
-  camera.position.y=THREE.MathUtils.damp(camera.position.y,4.2+bike.position.y*.2,2.5,dt);
-  camera.lookAt(bike.position.x*.25,1.15,-4);
+  camera.position.y=THREE.MathUtils.damp(camera.position.y,6.2+bike.position.y*.2,2.5,dt);
+  camera.lookAt(bike.position.x*.25,1.2,-8);
   road.position.z=(road.position.z+currentSpeed*dt)%8;
   stars.position.z=(stars.position.z+currentSpeed*dt*.15)%30;
   spawnTimer-=dt; pickupTimer-=dt;
