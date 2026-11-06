@@ -66,9 +66,9 @@ function makeWorld() {
   scene.background = new THREE.Color(0x071329);
   scene.fog = new THREE.FogExp2(0x09162b,.012);
   camera = new THREE.PerspectiveCamera(68,innerWidth/innerHeight,.1,500);
-  camera.position.set(0,5.4,10.5);
+  camera.position.set(0,4.2,9.5);
   renderer = new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.35));
   renderer.setSize(innerWidth,innerHeight);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -148,8 +148,8 @@ function update(dt) {
   bike.rotation.z=THREE.MathUtils.damp(bike.rotation.z,-(targetX-bike.position.x)*.12,5,dt);
   bike.rotation.x=THREE.MathUtils.damp(bike.rotation.x,turbo?-.08:0,3,dt);
   camera.position.x=THREE.MathUtils.damp(camera.position.x,bike.position.x*.35,2.5,dt);
-  camera.position.y=THREE.MathUtils.damp(camera.position.y,5.4+bike.position.y*.25,2.5,dt);
-  camera.lookAt(bike.position.x*.35,1,-8);
+  camera.position.y=THREE.MathUtils.damp(camera.position.y,4.2+bike.position.y*.2,2.5,dt);
+  camera.lookAt(bike.position.x*.25,1.15,-4);
   road.position.z=(road.position.z+currentSpeed*dt)%8;
   stars.position.z=(stars.position.z+currentSpeed*dt*.15)%30;
   spawnTimer-=dt; pickupTimer-=dt;
@@ -158,9 +158,9 @@ function update(dt) {
   for(let i=obstacles.length-1;i>=0;i--){
     const o=obstacles[i]; o.position.z+=currentSpeed*dt; o.rotation.y+=dt*.8;
     if(o.position.z>4){
-      if(Math.abs(o.position.x-bike.position.x)<1.15 && bike.position.y<.7){endGame();return}
+      if(Math.abs(o.position.x-bike.position.x)<1.15 && bike.position.y<.7){speed=Math.max(14,speed*.72);showToast('OBSTACLE HIT · KEEP RIDING');}
       scene.remove(o);obstacles.splice(i,1);
-    } else if(Math.abs(o.position.z-bike.position.z)<1.3 && Math.abs(o.position.x-bike.position.x)<1.05 && bike.position.y<.65){endGame();return}
+    } else if(Math.abs(o.position.z-bike.position.z)<1.3 && Math.abs(o.position.x-bike.position.x)<1.05 && bike.position.y<.65){speed=Math.max(14,speed*.72);showToast('OBSTACLE HIT · KEEP RIDING');o.position.z=5;}
   }
   for(let i=pickups.length-1;i>=0;i--){
     const p=pickups[i]; p.position.z+=currentSpeed*dt; p.rotation.y+=dt*2.2;
