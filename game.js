@@ -81,8 +81,8 @@ function makeWorld() {
   sun.position.set(-8,15,8); sun.castShadow=true; scene.add(sun);
   // A more grounded solar-system view: Earth, its Moon, and distant Mars.
   const earthGroup = new THREE.Group();
-  earthGroup.position.set(-10,5.5,-82);
-  const earthRadius = 10;
+  earthGroup.position.set(-12,8,-78);
+  const earthRadius = 11.5;
   // Procedural Earth map: blue oceans, recognizable green continents and soft cloud bands.
   const earthCanvas=document.createElement('canvas');
   earthCanvas.width=1024; earthCanvas.height=512;
@@ -117,17 +117,29 @@ function makeWorld() {
   earthTexture.colorSpace=THREE.SRGBColorSpace;
   const earthOcean=new THREE.Mesh(
     new THREE.SphereGeometry(earthRadius,64,48),
-    new THREE.MeshStandardMaterial({map:earthTexture,roughness:.88,metalness:.01})
+    new THREE.MeshBasicMaterial({map:earthTexture, fog:false})
   );
   earthGroup.add(earthOcean);
+  const cloudCanvas=document.createElement('canvas');
+  cloudCanvas.width=1024; cloudCanvas.height=512;
+  const cloudCtx=cloudCanvas.getContext('2d');
+  for(let i=0;i<150;i++){
+    const x=(i*137)%1024, y=(i*71)%512;
+    cloudCtx.fillStyle='rgba(255,255,255,'+(0.10+(i%5)*.035)+')';
+    cloudCtx.beginPath();
+    cloudCtx.ellipse(x,y,18+(i%7)*8,4+(i%4)*2,(i%9)*.12,0,Math.PI*2);
+    cloudCtx.fill();
+  }
+  const cloudTexture=new THREE.CanvasTexture(cloudCanvas);
+  cloudTexture.colorSpace=THREE.SRGBColorSpace;
   const cloudShell = new THREE.Mesh(
-    new THREE.SphereGeometry(earthRadius*1.012,40,30),
-    new THREE.MeshBasicMaterial({color:0xd9f4ff,transparent:true,opacity:.10,side:THREE.DoubleSide,depthWrite:false})
+    new THREE.SphereGeometry(earthRadius*1.018,48,36),
+    new THREE.MeshBasicMaterial({map:cloudTexture,transparent:true,opacity:.7,side:THREE.DoubleSide,depthWrite:false,fog:false})
   );
   earthGroup.add(cloudShell);
   const atmosphere = new THREE.Mesh(
     new THREE.SphereGeometry(earthRadius*1.07,40,30),
-    new THREE.MeshBasicMaterial({color:0x4bbcff,transparent:true,opacity:.10,side:THREE.BackSide,depthWrite:false})
+    new THREE.MeshBasicMaterial({color:0x35aaff,transparent:true,opacity:.24,side:THREE.BackSide,depthWrite:false,fog:false})
   );
   earthGroup.add(atmosphere);
   scene.add(earthGroup);
@@ -136,7 +148,7 @@ function makeWorld() {
   earthLight.position.set(-35,30,-55); scene.add(earthLight);
 
   const moon = new THREE.Mesh(new THREE.SphereGeometry(2.15,28,20),new THREE.MeshStandardMaterial({color:0x9b9da3,roughness:1}));
-  moon.position.set(-1,17,-83); scene.add(moon);
+  moon.position.set(-1,19,-91); scene.add(moon);
   const moonCraterMat = new THREE.MeshBasicMaterial({color:0x777d87});
   for (const [x,y,z,r] of [[-.6,.4,1.9,.28],[.75,-.3,1.95,.2],[-.1,-.8,1.95,.16]]) {
     const crater = new THREE.Mesh(new THREE.CircleGeometry(r,16),moonCraterMat);
@@ -144,7 +156,7 @@ function makeWorld() {
   }
 
   const mars = new THREE.Mesh(new THREE.SphereGeometry(5.8,36,28),new THREE.MeshStandardMaterial({color:0x9d513b,roughness:1}));
-  mars.position.set(23,11,-108); scene.add(mars);
+  mars.position.set(23,10,-118); scene.add(mars);
   const marsLight = new THREE.PointLight(0xff7548,18,35); marsLight.position.copy(mars.position); scene.add(marsLight);
   const starGeo = new THREE.BufferGeometry(), positions=[];
   for(let i=0;i<900;i++) positions.push((Math.random()-.5)*180,Math.random()*75-4,-Math.random()*230);
@@ -158,7 +170,7 @@ function makeWorld() {
   for(let i=0;i<34;i++){
     const z=12-i*8;
     // Gentle alternating bends make the road feel like a real route through space.
-    const curveX = Math.sin(i*.105)*2.15 + Math.sin(i*.035)*.75;
+    const curveX = Math.sin(i*.16)*3.7 + Math.sin(i*.065)*1.8;
     const slab=box(road,[9,.35,8.1],roadMat,[curveX,-.42,z]);
     slab.receiveShadow=true;
     for(const edgeX of [-4.55,4.55]) box(road,[.1,.14,8],edgeMat,[curveX+edgeX,-.19,z]);
