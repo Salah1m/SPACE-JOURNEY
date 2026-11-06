@@ -30,7 +30,7 @@ function cylinder(parent, r1, r2, h, material, pos, rot=[0,0,0], segments=16) {
 }
 function makeBike() {
   const root = new THREE.Group();
-  const dark = mat(0x111b31,.3,.8), cyan = mat(0x29dff5,.25,.65,0x087d9c), white = mat(0xdcecff,.35,.4), orange = mat(0xffa52d,.3,.5,0x9b3d00);
+  const dark = new THREE.MeshStandardMaterial({color:0x111b31,metalness:.35,roughness:.35,emissive:0x142b45}), cyan = new THREE.MeshBasicMaterial({color:0x29dff5}), white = new THREE.MeshBasicMaterial({color:0xeaf6ff}), orange = new THREE.MeshBasicMaterial({color:0xffa52d});
   // Hover-bike body and twin glowing engines
   box(root,[.72,.32,1.65],dark,[0,.12,0],[.08,0,0]);
   box(root,[.56,.22,.72],cyan,[0,.31,-.18],[.12,0,0]);
@@ -66,9 +66,9 @@ function makeWorld() {
   scene.background = new THREE.Color(0x071329);
   scene.fog = new THREE.FogExp2(0x09162b,.012);
   camera = new THREE.PerspectiveCamera(68,innerWidth/innerHeight,.1,500);
-  camera.position.set(0,6.2,15);
+  camera.position.set(0,13,18);
   // Aim the camera at the track immediately; otherwise it starts level and the 3D world is below the view.
-  camera.lookAt(0,1.2,-8);
+  camera.lookAt(0,0.8,-5);
   renderer = new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(devicePixelRatio,1.35));
   renderer.setSize(innerWidth,innerHeight);
@@ -88,7 +88,9 @@ function makeWorld() {
   stars = new THREE.Points(starGeo,new THREE.PointsMaterial({color:0xc9eaff,size:.28,sizeAttenuation:true}));
   scene.add(stars);
   road = new THREE.Group(); scene.add(road);
-  const roadMat=mat(0x202b40,.88,.18), edgeMat=mat(0x29dff5,.35,.6,0x087d9c), lineMat=mat(0x7c9db8,.5,.3);
+  const roadMat=new THREE.MeshBasicMaterial({color:0x263b5b}), edgeMat=new THREE.MeshBasicMaterial({color:0x29dff5}), lineMat=new THREE.MeshBasicMaterial({color:0xd8f5ff});
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(9,280),new THREE.MeshBasicMaterial({color:0x182b49}));
+  ground.rotation.x=-Math.PI/2; ground.position.set(0,-.62,-112); road.add(ground);
   for(let i=0;i<34;i++){
     const z=12-i*8;
     const slab=box(road,[9,.35,8.1],roadMat,[0,-.42,z]);
@@ -150,8 +152,8 @@ function update(dt) {
   bike.rotation.z=THREE.MathUtils.damp(bike.rotation.z,-(targetX-bike.position.x)*.12,5,dt);
   bike.rotation.x=THREE.MathUtils.damp(bike.rotation.x,turbo?-.08:0,3,dt);
   camera.position.x=THREE.MathUtils.damp(camera.position.x,bike.position.x*.35,2.5,dt);
-  camera.position.y=THREE.MathUtils.damp(camera.position.y,6.2+bike.position.y*.2,2.5,dt);
-  camera.lookAt(bike.position.x*.25,1.2,-8);
+  camera.position.y=THREE.MathUtils.damp(camera.position.y,13+bike.position.y*.2,2.5,dt);
+  camera.lookAt(bike.position.x*.25,0.8,-5);
   road.position.z=(road.position.z+currentSpeed*dt)%8;
   stars.position.z=(stars.position.z+currentSpeed*dt*.15)%30;
   spawnTimer-=dt; pickupTimer-=dt;
