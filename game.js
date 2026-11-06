@@ -91,7 +91,7 @@ function makeWorld() {
     const z=12-i*8;
     const slab=box(road,[9,.35,8.1],roadMat,[0,-.42,z]);
     slab.receiveShadow=true;
-    for(const x of [-4.55,4.55]) box(road,[.1,.14,8],[.1,.14,8],edgeMat,[x,-.19,z]);
+    for(const x of [-4.55,4.55]) box(road,[.1,.14,8],edgeMat,[x,-.19,z]);
     if(i%2===0) box(road,[.09,.025,3],lineMat,[0,-.23,z]);
     for(const x of [-7,7]) {
       const pillar=new THREE.Group(); pillar.position.set(x,-.1,z); road.add(pillar);
