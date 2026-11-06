@@ -81,27 +81,30 @@ function makeWorld() {
   sun.position.set(-8,15,8); sun.castShadow=true; scene.add(sun);
   // A more grounded solar-system view: Earth, its Moon, and distant Mars.
   const earthGroup = new THREE.Group();
-  earthGroup.position.set(-16,9,-72);
+  earthGroup.position.set(-10,5.5,-82);
   const earthRadius = 10;
   const earthOcean = new THREE.Mesh(
     new THREE.SphereGeometry(earthRadius,48,36),
     new THREE.MeshStandardMaterial({color:0x1769a8,roughness:.82,metalness:.02})
   );
   earthGroup.add(earthOcean);
-  // Approximate raised continental shapes on the globe.
-  const landMat = new THREE.MeshStandardMaterial({color:0x4d8b58,roughness:1});
-  const landPatches = [
-    [-12,22,2.8,4.2], [18,8,2.2,3.4], [38,-18,2.5,3.8],
-    [-42,-8,2.0,3.1], [58,35,1.8,2.6], [-72,48,1.5,2.0]
+  // Large raised continent silhouettes placed on the camera-facing side of Earth.
+  const landMat = new THREE.MeshStandardMaterial({color:0x57945b,roughness:1});
+  const front = new THREE.Vector3(.18,.05,.98).normalize();
+  const landShapes = [
+    {offset:new THREE.Vector3(-.18,.16,0),scale:[2.5,3.5,.22],tilt:-.22},
+    {offset:new THREE.Vector3(.22,-.12,0),scale:[2.0,3.0,.2],tilt:.28},
+    {offset:new THREE.Vector3(-.02,-.43,0),scale:[1.5,2.0,.18],tilt:-.1},
+    {offset:new THREE.Vector3(.52,.34,0),scale:[1.2,1.8,.16],tilt:.45}
   ];
-  for (const [lat,lon,w,h] of landPatches) {
-    const phi = (90-lat)*Math.PI/180, theta = (lon+180)*Math.PI/180;
-    const normal = new THREE.Vector3(-Math.sin(phi)*Math.cos(theta),Math.cos(phi),Math.sin(phi)*Math.sin(theta)).normalize();
-    const patch = new THREE.Mesh(new THREE.SphereGeometry(1,16,12),landMat);
-    patch.scale.set(w,h,.12);
-    patch.position.copy(normal.clone().multiplyScalar(earthRadius*1.004));
-    patch.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),normal);
-    earthGroup.add(patch);
+  for (const shape of landShapes) {
+    const normal=front.clone().add(shape.offset).normalize();
+    const land=new THREE.Mesh(new THREE.SphereGeometry(1,24,18),landMat);
+    land.scale.set(...shape.scale);
+    land.position.copy(normal.clone().multiplyScalar(earthRadius*1.006));
+    land.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),normal);
+    land.rotateZ(shape.tilt);
+    earthGroup.add(land);
   }
   const cloudShell = new THREE.Mesh(
     new THREE.SphereGeometry(earthRadius*1.012,40,30),
