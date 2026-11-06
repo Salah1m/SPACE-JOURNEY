@@ -9,7 +9,7 @@ const loading = document.querySelector('#loading');
 const countdownEl = document.querySelector('#countdown');
 const toast = document.querySelector('#toast');
 
-let scene, camera, renderer, bike, rider, road, roadLines = [], obstacles = [], pickups = [], stars;
+let scene, camera, renderer, bike, rider, road, roadLines = [], obstacles = [], pickups = [], stars, earthGroupRef;
 let running = false, paused = false, started = false;
 let distance = 0, coinCount = 0, speed = 23, targetX = 0, steer = 0, jumpTime = 0, turboTime = 0;
 let lastTime = 0, spawnTimer = 0, pickupTimer = 0, toastTimer = 0;
@@ -79,9 +79,56 @@ function makeWorld() {
   scene.add(new THREE.HemisphereLight(0x9bcfff,0x35233b,2.1));
   const sun = new THREE.DirectionalLight(0xffd6a1,2.5);
   sun.position.set(-8,15,8); sun.castShadow=true; scene.add(sun);
-  const planet = new THREE.Mesh(new THREE.SphereGeometry(8,32,24),mat(0x9c4936,.9,.05));
-  planet.position.set(-18,12,-85); scene.add(planet);
-  const planetGlow = new THREE.PointLight(0xff7548,90,70); planetGlow.position.copy(planet.position); scene.add(planetGlow);
+  // A more grounded solar-system view: Earth, its Moon, and distant Mars.
+  const earthGroup = new THREE.Group();
+  earthGroup.position.set(-20,21,-92);
+  const earthRadius = 10;
+  const earthOcean = new THREE.Mesh(
+    new THREE.SphereGeometry(earthRadius,48,36),
+    new THREE.MeshStandardMaterial({color:0x1769a8,roughness:.82,metalness:.02})
+  );
+  earthGroup.add(earthOcean);
+  // Approximate raised continental shapes on the globe.
+  const landMat = new THREE.MeshStandardMaterial({color:0x4d8b58,roughness:1});
+  const landPatches = [
+    [-12,22,2.8,4.2], [18,8,2.2,3.4], [38,-18,2.5,3.8],
+    [-42,-8,2.0,3.1], [58,35,1.8,2.6], [-72,48,1.5,2.0]
+  ];
+  for (const [lat,lon,w,h] of landPatches) {
+    const phi = (90-lat)*Math.PI/180, theta = (lon+180)*Math.PI/180;
+    const normal = new THREE.Vector3(-Math.sin(phi)*Math.cos(theta),Math.cos(phi),Math.sin(phi)*Math.sin(theta)).normalize();
+    const patch = new THREE.Mesh(new THREE.SphereGeometry(1,16,12),landMat);
+    patch.scale.set(w,h,.12);
+    patch.position.copy(normal.clone().multiplyScalar(earthRadius*1.004));
+    patch.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),normal);
+    earthGroup.add(patch);
+  }
+  const cloudShell = new THREE.Mesh(
+    new THREE.SphereGeometry(earthRadius*1.012,40,30),
+    new THREE.MeshBasicMaterial({color:0xd9f4ff,transparent:true,opacity:.10,side:THREE.DoubleSide,depthWrite:false})
+  );
+  earthGroup.add(cloudShell);
+  const atmosphere = new THREE.Mesh(
+    new THREE.SphereGeometry(earthRadius*1.07,40,30),
+    new THREE.MeshBasicMaterial({color:0x4bbcff,transparent:true,opacity:.10,side:THREE.BackSide,depthWrite:false})
+  );
+  earthGroup.add(atmosphere);
+  scene.add(earthGroup);
+  earthGroupRef = earthGroup;
+  const earthLight = new THREE.DirectionalLight(0xffe4b5,1.4);
+  earthLight.position.set(-35,30,-55); scene.add(earthLight);
+
+  const moon = new THREE.Mesh(new THREE.SphereGeometry(2.15,28,20),new THREE.MeshStandardMaterial({color:0x9b9da3,roughness:1}));
+  moon.position.set(-5,27,-101); scene.add(moon);
+  const moonCraterMat = new THREE.MeshBasicMaterial({color:0x777d87});
+  for (const [x,y,z,r] of [[-.6,.4,1.9,.28],[.75,-.3,1.95,.2],[-.1,-.8,1.95,.16]]) {
+    const crater = new THREE.Mesh(new THREE.CircleGeometry(r,16),moonCraterMat);
+    crater.position.set(x,y,z); moon.add(crater);
+  }
+
+  const mars = new THREE.Mesh(new THREE.SphereGeometry(5.8,36,28),new THREE.MeshStandardMaterial({color:0x9d513b,roughness:1}));
+  mars.position.set(28,15,-135); scene.add(mars);
+  const marsLight = new THREE.PointLight(0xff7548,18,35); marsLight.position.copy(mars.position); scene.add(marsLight);
   const starGeo = new THREE.BufferGeometry(), positions=[];
   for(let i=0;i<900;i++) positions.push((Math.random()-.5)*180,Math.random()*75-4,-Math.random()*230);
   starGeo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
@@ -179,6 +226,7 @@ function animate(now) {
   requestAnimationFrame(animate);
   const dt=Math.min((now-lastTime)/1000||0,.04); lastTime=now;
   update(dt);
+  if (earthGroupRef) earthGroupRef.rotation.y += dt*.018;
   if(renderer) renderer.render(scene,camera);
 }
 function setSteer(clientX) {
