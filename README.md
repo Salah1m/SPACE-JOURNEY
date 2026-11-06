@@ -1,27 +1,42 @@
 # SPACE JOURNEY 🚀
 
-A standalone 3D Android space motorcycle adventure game built with Godot Engine.
+A standalone mobile-first 3D space motorcycle game prototype that runs in a web browser.
 
-## Project goals
+## Playable prototype
 
-- Third-person space motorcycle riding with an astronaut rider
-- Free-form winding roads and touch steering
-- Jump and Turbo controls
-- Collectible coins and obstacles
-- Endless progression across Mars, ice, and space worlds
-- Garage, unlockable vehicles, and upgrades
-- Landscape Android gameplay
+The first browser prototype includes:
+- A third-person 3D hover motorcycle and astronaut rider
+- A Mars-inspired cosmic highway
+- Touch-and-drag steering
+- Jump and turbo controls
+- Energy coins and asteroid obstacles
+- Distance and coin counters
+- Mobile landscape-friendly interface
 
-## Development plan
+## Run locally
+
+Open `index.html` from a static web server. The game loads Three.js from jsDelivr, so an internet connection is required.
+
+## Publish with GitHub Pages
+
+1. Open this repository on GitHub.
+2. Go to **Settings → Pages**.
+3. Under **Build and deployment**, choose **Deploy from a branch**.
+4. Select branch **main** and folder **/(root)**, then save.
+5. After GitHub finishes publishing, open the Pages URL shown in that section.
+
+## Development roadmap
 
 1. Prototype the motorcycle, rider, follow camera, winding track, and touch controls.
-2. Test performance and handling on Android.
-3. Add coins, obstacles, jumping, and Turbo.
-4. Add worlds, progression, and the garage.
-5. Prepare Android release builds and store assets.
+2. Test handling and performance on Android.
+3. Improve the bike, track, obstacles, and effects.
+4. Add more worlds, progression, garage, and unlockable vehicles.
+5. Package as an Android app when the browser version is stable.
 
-## Engine
+## Technology
 
-Godot 4.x, GDScript, and the Mobile renderer (initial target).
+- HTML, CSS, JavaScript
+- Three.js (loaded from jsDelivr)
+- GitHub Pages for static hosting
 
-This repository is independent of MYSTERIO MAROC LIVE.
+This repository is independent of **MYSTERIO MAROC LIVE**. No files in that project are changed.
