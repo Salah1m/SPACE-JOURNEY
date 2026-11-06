@@ -81,8 +81,8 @@ function makeWorld() {
   sun.position.set(-8,15,8); sun.castShadow=true; scene.add(sun);
   // A more grounded solar-system view: Earth, its Moon, and distant Mars.
   const earthGroup = new THREE.Group();
-  earthGroup.position.set(-12,8,-78);
-  const earthRadius = 11.5;
+  earthGroup.position.set(-18,12,-105);
+  const earthRadius = 10.5;
   // Procedural Earth map: blue oceans, recognizable green continents and soft cloud bands.
   const earthCanvas=document.createElement('canvas');
   earthCanvas.width=1024; earthCanvas.height=512;
@@ -165,20 +165,39 @@ function makeWorld() {
   scene.add(stars);
   road = new THREE.Group(); scene.add(road);
   const roadMat=new THREE.MeshBasicMaterial({color:0x263b5b}), edgeMat=new THREE.MeshBasicMaterial({color:0x29dff5}), lineMat=new THREE.MeshBasicMaterial({color:0xd8f5ff});
-  const ground=new THREE.Mesh(new THREE.PlaneGeometry(9,280),new THREE.MeshBasicMaterial({color:0x182b49}));
-  ground.rotation.x=-Math.PI/2; ground.position.set(0,-.62,-112); road.add(ground);
-  for(let i=0;i<34;i++){
-    const z=12-i*8;
-    // Gentle alternating bends make the road feel like a real route through space.
-    const curveX = Math.sin(i*.16)*3.7 + Math.sin(i*.065)*1.8;
-    const slab=box(road,[9,.35,8.1],roadMat,[curveX,-.42,z]);
-    slab.receiveShadow=true;
-    for(const edgeX of [-4.55,4.55]) box(road,[.1,.14,8],edgeMat,[curveX+edgeX,-.19,z]);
-    if(i%2===0) box(road,[.09,.025,3],lineMat,[curveX,-.23,z]);
-    for(const side of [-1,1]) {
-      const pillar=new THREE.Group(); pillar.position.set(curveX+side*7,-.1,z); road.add(pillar);
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(180,320),new THREE.MeshBasicMaterial({color:0x08152b}));
+  ground.rotation.x=-Math.PI/2; ground.position.set(0,-.64,-112); road.add(ground);
+  // One continuous curved road mesh: no separated rectangular road tiles.
+  const roadCenterAt=(z)=>{const t=(12-z)/8;return Math.sin(t*.16)*3.7+Math.sin(t*.065)*1.8;};
+  const roadPositions=[], roadIndices=[], leftEdge=[], rightEdge=[];
+  const roadSteps=180, roadStart=20, roadEnd=-260, halfWidth=4.5;
+  for(let i=0;i<=roadSteps;i++){
+    const z=roadStart+(roadEnd-roadStart)*i/roadSteps;
+    const cx=roadCenterAt(z);
+    roadPositions.push(cx-halfWidth,-.43,z,cx+halfWidth,-.43,z);
+    leftEdge.push(new THREE.Vector3(cx-halfWidth,-.20,z));
+    rightEdge.push(new THREE.Vector3(cx+halfWidth,-.20,z));
+    if(i<roadSteps){const a=i*2;roadIndices.push(a,a+1,a+2,a+1,a+3,a+2);}
+  }
+  const roadGeometry=new THREE.BufferGeometry();
+  roadGeometry.setAttribute('position',new THREE.Float32BufferAttribute(roadPositions,3));
+  roadGeometry.setIndex(roadIndices);roadGeometry.computeVertexNormals();
+  road.add(new THREE.Mesh(roadGeometry,roadMat));
+  const edgeMaterial=new THREE.LineBasicMaterial({color:0x29dff5});
+  road.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(leftEdge),edgeMaterial));
+  road.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(rightEdge),edgeMaterial));
+  // Dashed centre markings follow the exact same curve.
+  for(let z=14;z>-250;z-=16){
+    const cx=roadCenterAt(z);
+    box(road,[.09,.025,3.2],lineMat,[cx,-.205,z]);
+  }
+  // Roadside lights are attached to the curve, not placed in straight rows.
+  for(let z=12;z>-250;z-=8){
+    const cx=roadCenterAt(z);
+    for(const side of [-1,1]){
+      const pillar=new THREE.Group();pillar.position.set(cx+side*7,-.1,z);road.add(pillar);
       cylinder(pillar,.1,.16,2.8,edgeMat,[0,1.2,0]);
-      const lamp=new THREE.PointLight(0x36dfff,2,5); lamp.position.set(0,2.5,0); pillar.add(lamp);
+      const lamp=new THREE.PointLight(0x36dfff,1.5,4);lamp.position.set(0,2.5,0);pillar.add(lamp);
     }
   }
   bike=makeBike();
