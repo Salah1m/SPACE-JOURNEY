@@ -83,29 +83,43 @@ function makeWorld() {
   const earthGroup = new THREE.Group();
   earthGroup.position.set(-10,5.5,-82);
   const earthRadius = 10;
-  const earthOcean = new THREE.Mesh(
-    new THREE.SphereGeometry(earthRadius,48,36),
-    new THREE.MeshStandardMaterial({color:0x1769a8,roughness:.82,metalness:.02})
+  // Procedural Earth map: blue oceans, recognizable green continents and soft cloud bands.
+  const earthCanvas=document.createElement('canvas');
+  earthCanvas.width=1024; earthCanvas.height=512;
+  const ctx=earthCanvas.getContext('2d');
+  const oceanGrad=ctx.createLinearGradient(0,0,0,512);
+  oceanGrad.addColorStop(0,'#174f86'); oceanGrad.addColorStop(.48,'#1676b5'); oceanGrad.addColorStop(1,'#0b376b');
+  ctx.fillStyle=oceanGrad; ctx.fillRect(0,0,1024,512);
+  ctx.fillStyle='#568d50'; ctx.strokeStyle='#83ad69'; ctx.lineWidth=7;
+  const continents=[
+    [[90,115],[135,75],[205,65],[245,95],[230,145],[190,165],[180,220],[145,250],[115,205],[80,180]],
+    [[205,255],[250,275],[270,335],[250,405],[220,455],[195,390],[180,320]],
+    [[440,90],[500,70],[555,90],[590,125],[570,165],[530,175],[510,220],[475,205],[455,160]],
+    [[505,225],[555,210],[590,255],[580,320],[550,390],[520,360],[495,300]],
+    [[630,100],[690,65],[770,75],[825,110],[865,160],[830,205],[780,195],[745,235],[700,205],[665,160]],
+    [[760,260],[805,245],[840,285],[825,335],[790,350],[765,315]],
+    [[900,390],[935,380],[960,410],[940,445],[905,435]]
+  ];
+  for(const points of continents){
+    ctx.beginPath(); ctx.moveTo(points[0][0],points[0][1]);
+    for(let i=1;i<points.length;i++)ctx.lineTo(points[i][0],points[i][1]);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  // Subtle polar ice and cloud wisps.
+  ctx.fillStyle='rgba(220,245,255,.78)';
+  ctx.fillRect(0,0,1024,20); ctx.fillRect(0,492,1024,20);
+  for(let i=0;i<34;i++){
+    const x=(i*173)%1024, y=55+((i*79)%400);
+    ctx.beginPath(); ctx.ellipse(x,y,24+(i%5)*11,3+(i%3)*2,-.18,0,Math.PI*2);
+    ctx.fillStyle='rgba(235,248,255,.10)'; ctx.fill();
+  }
+  const earthTexture=new THREE.CanvasTexture(earthCanvas);
+  earthTexture.colorSpace=THREE.SRGBColorSpace;
+  const earthOcean=new THREE.Mesh(
+    new THREE.SphereGeometry(earthRadius,64,48),
+    new THREE.MeshStandardMaterial({map:earthTexture,roughness:.88,metalness:.01})
   );
   earthGroup.add(earthOcean);
-  // Large raised continent silhouettes placed on the camera-facing side of Earth.
-  const landMat = new THREE.MeshStandardMaterial({color:0x57945b,roughness:1});
-  const front = new THREE.Vector3(.18,.05,.98).normalize();
-  const landShapes = [
-    {offset:new THREE.Vector3(-.18,.16,0),scale:[2.5,3.5,.22],tilt:-.22},
-    {offset:new THREE.Vector3(.22,-.12,0),scale:[2.0,3.0,.2],tilt:.28},
-    {offset:new THREE.Vector3(-.02,-.43,0),scale:[1.5,2.0,.18],tilt:-.1},
-    {offset:new THREE.Vector3(.52,.34,0),scale:[1.2,1.8,.16],tilt:.45}
-  ];
-  for (const shape of landShapes) {
-    const normal=front.clone().add(shape.offset).normalize();
-    const land=new THREE.Mesh(new THREE.SphereGeometry(1,24,18),landMat);
-    land.scale.set(...shape.scale);
-    land.position.copy(normal.clone().multiplyScalar(earthRadius*1.006));
-    land.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),normal);
-    land.rotateZ(shape.tilt);
-    earthGroup.add(land);
-  }
   const cloudShell = new THREE.Mesh(
     new THREE.SphereGeometry(earthRadius*1.012,40,30),
     new THREE.MeshBasicMaterial({color:0xd9f4ff,transparent:true,opacity:.10,side:THREE.DoubleSide,depthWrite:false})
