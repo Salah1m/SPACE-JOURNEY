@@ -67,6 +67,8 @@ function makeWorld() {
   scene.fog = new THREE.FogExp2(0x09162b,.012);
   camera = new THREE.PerspectiveCamera(68,innerWidth/innerHeight,.1,500);
   camera.position.set(0,4.2,9.5);
+  // Aim the camera at the track immediately; otherwise it starts level and the 3D world is below the view.
+  camera.lookAt(0,1.1,-4);
   renderer = new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
   renderer.setPixelRatio(Math.min(devicePixelRatio,1.35));
   renderer.setSize(innerWidth,innerHeight);
