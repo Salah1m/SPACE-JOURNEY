@@ -81,7 +81,7 @@ function makeWorld() {
   sun.position.set(-8,15,8); sun.castShadow=true; scene.add(sun);
   // A more grounded solar-system view: Earth, its Moon, and distant Mars.
   const earthGroup = new THREE.Group();
-  earthGroup.position.set(18,17,-82);
+  earthGroup.position.set(-16,9,-72);
   const earthRadius = 10;
   const earthOcean = new THREE.Mesh(
     new THREE.SphereGeometry(earthRadius,48,36),
@@ -119,7 +119,7 @@ function makeWorld() {
   earthLight.position.set(-35,30,-55); scene.add(earthLight);
 
   const moon = new THREE.Mesh(new THREE.SphereGeometry(2.15,28,20),new THREE.MeshStandardMaterial({color:0x9b9da3,roughness:1}));
-  moon.position.set(1,23,-94); scene.add(moon);
+  moon.position.set(-1,17,-83); scene.add(moon);
   const moonCraterMat = new THREE.MeshBasicMaterial({color:0x777d87});
   for (const [x,y,z,r] of [[-.6,.4,1.9,.28],[.75,-.3,1.95,.2],[-.1,-.8,1.95,.16]]) {
     const crater = new THREE.Mesh(new THREE.CircleGeometry(r,16),moonCraterMat);
@@ -127,7 +127,7 @@ function makeWorld() {
   }
 
   const mars = new THREE.Mesh(new THREE.SphereGeometry(5.8,36,28),new THREE.MeshStandardMaterial({color:0x9d513b,roughness:1}));
-  mars.position.set(-25,17,-128); scene.add(mars);
+  mars.position.set(23,11,-108); scene.add(mars);
   const marsLight = new THREE.PointLight(0xff7548,18,35); marsLight.position.copy(mars.position); scene.add(marsLight);
   const starGeo = new THREE.BufferGeometry(), positions=[];
   for(let i=0;i<900;i++) positions.push((Math.random()-.5)*180,Math.random()*75-4,-Math.random()*230);
